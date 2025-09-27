@@ -17,6 +17,7 @@ RUN yum update -y && yum install -y \
     openssh-clients \
     mysql \
     postgresql \
+    putty \
     && yum clean all
 
 # Create directories for logs, cache, and bootstrap scripts

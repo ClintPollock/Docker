@@ -60,6 +60,7 @@ docker logs -f britive-broker
 The container includes these tools commonly needed by Britive Broker scripts:
 
 - **SSH tools**: `ssh`, `ssh-keygen`, `scp` for SSH key management
+- **PuTTY tools**: `puttygen`, `pscp`, `plink` for Windows SSH key formats
 - **MySQL client**: `mysql` for database connections
 - **PostgreSQL client**: `psql` for PostgreSQL connections
 - **System utilities**: `curl`, `hostname`, `procps`, `util-linux`
