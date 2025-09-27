@@ -17,8 +17,14 @@ RUN yum update -y && yum install -y \
     openssh-clients \
     mysql \
     postgresql \
-    putty \
+    wget \
     && yum clean all
+
+# Install PuTTY tools manually from official source
+RUN wget -q -O /usr/local/bin/puttygen https://the.earth.li/~sgtatham/putty/latest/x86_64/puttygen \
+    && wget -q -O /usr/local/bin/pscp https://the.earth.li/~sgtatham/putty/latest/x86_64/pscp \
+    && wget -q -O /usr/local/bin/plink https://the.earth.li/~sgtatham/putty/latest/x86_64/plink \
+    && chmod +x /usr/local/bin/puttygen /usr/local/bin/pscp /usr/local/bin/plink
 
 # Create directories for logs, cache, and bootstrap scripts
 RUN mkdir -p /app/logs /app/cache /app/bootstrap
