@@ -18,7 +18,9 @@ RUN yum update -y && yum install -y \
     mysql \
     postgresql \
     python3 \
-    jq \
+    && yum clean all \
+    && yum install -y epel-release \
+    && yum install -y jq \
     && yum clean all
 
 # Note: PuTTY tools (puttygen, pscp, plink) are not available in Amazon Linux repos
@@ -35,8 +37,9 @@ COPY config/ /app/config/
 
 # Copy startup script and key converter
 COPY docker-entrypoint.sh /app/
-COPY convert-to-putty.py /usr/local/bin/
-RUN chmod +x /app/docker-entrypoint.sh /usr/local/bin/convert-to-putty.py
+COPY convert-to-putty.py /usr/local/bin/convert-to-putty.py
+RUN chmod +x /app/docker-entrypoint.sh /usr/local/bin/convert-to-putty.py \
+    && ln -sf /usr/local/bin/convert-to-putty.py /usr/local/bin/convert-to-putty
 
 # Set environment variables with default values
 ENV TENANT_SUBDOMAIN=""
