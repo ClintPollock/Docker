@@ -73,6 +73,15 @@ ln -sf /app/logs/britive-broker.log /var/log/britive-broker.log 2>/dev/null || t
 # Initialize log file if it doesn't exist
 touch /app/logs/britive-broker.log
 
+# Fix SSH keys permissions inside container
+if [ -d "/opt/britive-broker/.ssh" ]; then
+    log "Setting proper SSH key permissions"
+    chmod 700 /opt/britive-broker/.ssh
+    chmod 600 /opt/britive-broker/.ssh/* 2>/dev/null || true
+    chown -R root:root /opt/britive-broker/.ssh 2>/dev/null || true
+    log "SSH keys permissions configured"
+fi
+
 log "Log directory structure created"
 
 log "Starting Britive Broker service..."
