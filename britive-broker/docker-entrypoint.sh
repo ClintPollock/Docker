@@ -13,7 +13,7 @@ log() {
 tail_logs() {
     local log_file="$1"
     if [ "$LOG_TO_STDOUT" = "true" ]; then
-        log "Starting log tail for $log_file to stdout for CloudWatch/console"
+        log "Starting log tail for $log_file to stdout"
         # Start tailing in background, but make it more robust
         (tail -F "$log_file" 2>/dev/null || true) &
         TAIL_PID=$!

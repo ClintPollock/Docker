@@ -33,10 +33,6 @@ RUN chmod +x /app/docker-entrypoint.sh
 ENV TENANT_SUBDOMAIN=""
 ENV AUTHENTICATION_TOKEN=""
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
-# CloudWatch logging configuration
-ENV AWS_REGION=""
-ENV CLOUDWATCH_LOG_GROUP="/aws/docker/britive-broker"
-ENV CLOUDWATCH_LOG_STREAM=""
 ENV LOG_TO_STDOUT="true"
 
 # Expose port (if the broker uses any specific port, adjust as needed)

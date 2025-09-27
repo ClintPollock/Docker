@@ -1,222 +1,181 @@
 # Britive Broker Docker Container
 
-This repository contains the Docker configuration for containerizing the Britive Broker application.
+A containerized version of the Britive Broker service for easy deployment and scaling.
 
 ## Prerequisites
 
-- Docker and Docker Compose installed on your system
+- Docker and Docker Compose
 - Britive tenant subdomain and authentication token
 
 ## Quick Start
 
-### Using Docker Compose (Recommended)
+### 1. Create Environment File
 
-1. **Create an environment file** (`.env`) in the same directory as `docker-compose.yml`:
+Create a `.env` file with your Britive credentials:
 
 ```env
 TENANT_SUBDOMAIN=your-tenant-subdomain
 AUTHENTICATION_TOKEN=your-authentication-token
 ```
 
-2. **Build and run the container**:
+### 2. Build and Run
 
 ```bash
-docker-compose up -d
-```
-
-### Using Docker Commands
-
-1. **Build the image**:
-
-```bash
+# Build the image
 docker build -t britive-broker:latest .
+
+# Run single instance
+docker-compose up -d
+
+# Or run multiple instances (recommended for high availability)
+docker-compose up -d --scale britive-broker=2
 ```
 
-2. **Run the container**:
+### 3. Monitor
 
 ```bash
-docker run -d \
-  --name britive-broker \
-  -e TENANT_SUBDOMAIN=your-tenant-subdomain \
-  -e AUTHENTICATION_TOKEN=your-authentication-token \
-  -v britive-logs:/app/logs \
-  -v britive-cache:/app/cache \
-  britive-broker:latest
+# View all logs
+docker-compose logs -f
+
+# Check status
+docker-compose ps
+
+# View individual container logs
+docker logs -f britive-broker
 ```
 
 ## Configuration
 
 ### Required Environment Variables
 
-- `TENANT_SUBDOMAIN`: Your Britive tenant subdomain
+- `TENANT_SUBDOMAIN`: Your Britive tenant subdomain (e.g., "company-name")
 - `AUTHENTICATION_TOKEN`: Your Britive authentication token
 
 ### Optional Environment Variables
 
 - `JAVA_OPTS`: JVM options (default: `-Xmx512m -Xms256m`)
-- `LOG_TO_STDOUT`: Enable stdout logging (default: `true`)
-- `AWS_REGION`: AWS region for CloudWatch logging
-- `CLOUDWATCH_LOG_GROUP`: CloudWatch log group name (default: `/aws/docker/britive-broker`)
-- `CLOUDWATCH_LOG_STREAM`: CloudWatch log stream name
 
-## Logging
+## Scaling
 
-The Britive Broker supports multiple logging configurations:
-
-### Log Locations
-- **Container logs**: `/app/logs/britive-broker.log`
-- **Symlinked path**: `/var/log/britive-broker.log`
-- **Stdout**: When `LOG_TO_STDOUT=true` (default)
-- **CloudWatch**: When using awslogs driver
-
-### CloudWatch Integration
-
-For production deployments with CloudWatch logging:
-
-1. **Set up AWS credentials**:
-   ```bash
-   export AWS_ACCESS_KEY_ID=your-access-key
-   export AWS_SECRET_ACCESS_KEY=your-secret-key
-   export AWS_DEFAULT_REGION=us-east-1
-   ```
-
-2. **Add CloudWatch variables to your `.env` file**:
-   ```env
-   AWS_REGION=us-east-1
-   CLOUDWATCH_LOG_GROUP=/aws/docker/britive-broker
-   CLOUDWATCH_LOG_STREAM=britive-broker-production
-   ```
-
-3. **Run with CloudWatch logging**:
-   ```bash
-   docker-compose up -d
-   ```
-
-### Local Development
-
-For local development without CloudWatch:
+Run multiple broker instances for high availability:
 
 ```bash
-docker-compose -f docker-compose.local.yml up -d
+# Scale to 3 instances
+docker-compose up -d --scale britive-broker=3
+
+# Scale back to 1 instance
+docker-compose up -d --scale britive-broker=1
 ```
 
-This will:
-- Mount logs directory to `./logs` on the host
-- Use JSON file logging driver
-- Still output logs to stdout
+## Logs
 
-### Viewing Logs
+Logs are available in multiple ways:
 
-```bash
-# View container stdout logs
-docker logs -f britive-broker
+- **Docker logs**: `docker-compose logs -f`
+- **Log files**: Mounted to `./logs/` directory on host
+- **Individual containers**: `docker logs -f <container-name>`
 
-# View log file directly
-docker exec britive-broker tail -f /app/logs/britive-broker.log
+Log files are automatically rotated:
+- Maximum size: 100MB per file
+- Retention: 5 files
+- Archive location: `./logs/archive/`
 
-# View CloudWatch logs (AWS CLI)
-aws logs tail /aws/docker/britive-broker --follow
-```
+## Management
 
-For detailed CloudWatch setup instructions, see [CLOUDWATCH.md](CLOUDWATCH.md).
-
-## Volumes
-
-The container creates two volumes for persistent data:
-
-- `/app/logs`: Application logs
-- `/app/cache`: Application cache data
-
-## Monitoring
-
-### View logs
+### Start/Stop Services
 
 ```bash
-# Using docker-compose
-docker-compose logs -f
+# Start
+docker-compose up -d
 
-# Using docker
-docker logs -f britive-broker
-```
-
-### Check container status
-
-```bash
-# Using docker-compose
-docker-compose ps
-
-# Using docker
-docker ps | grep britive-broker
-```
-
-## Stopping the Container
-
-```bash
-# Using docker-compose
+# Stop
 docker-compose down
 
-# Using docker
-docker stop britive-broker
-docker rm britive-broker
+# Restart
+docker-compose restart
+```
+
+### View Container Status
+
+```bash
+# All containers
+docker-compose ps
+
+# Specific service
+docker ps --filter "name=britive-broker"
+```
+
+### Update and Rebuild
+
+```bash
+# Rebuild image
+docker-compose build
+
+# Recreate containers with new image
+docker-compose up -d --force-recreate
+```
+
+## File Structure
+
+```
+britive-broker/
+├── Dockerfile                    # Container definition
+├── docker-compose.yml           # Service orchestration
+├── docker-compose.local.yml     # Alternative local setup
+├── docker-entrypoint.sh         # Container startup script
+├── .dockerignore                # Build exclusions
+├── britive-broker-1.0.0.jar    # Application JAR file
+├── config/                      # Configuration files
+│   ├── broker-config.yml        # Runtime configuration
+│   ├── broker-config-template.yml
+│   └── logback.xml             # Logging configuration
+├── logs/                        # Log files (created at runtime)
+└── README.md                   # This file
 ```
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Container exits immediately**: Check that both `TENANT_SUBDOMAIN` and `AUTHENTICATION_TOKEN` are set correctly.
+1. **Container exits immediately**
+   - Check that both `TENANT_SUBDOMAIN` and `AUTHENTICATION_TOKEN` are set
+   - Verify credentials are correct
 
-2. **Permission issues**: Ensure the Docker daemon has proper permissions to create volumes and run containers.
+2. **Network connectivity issues**
+   - Ensure the container can reach the internet
+   - Check DNS resolution: `docker exec britive-broker nslookup google.com`
 
-3. **Java out of memory errors**: Increase memory allocation using the `JAVA_OPTS` environment variable:
-   ```bash
-   JAVA_OPTS="-Xmx1024m -Xms512m"
-   ```
+3. **Out of memory errors**
+   - Increase memory allocation: `JAVA_OPTS="-Xmx1024m -Xms512m"`
 
-### Debug Mode
-
-To run the container interactively for debugging:
+### Debug Commands
 
 ```bash
-docker run -it --rm \
-  -e TENANT_SUBDOMAIN=your-tenant-subdomain \
-  -e AUTHENTICATION_TOKEN=your-authentication-token \
-  britive-broker:latest /bin/bash
+# Interactive shell access
+docker exec -it britive-broker /bin/bash
+
+# View detailed logs
+docker-compose logs --tail=100 -f
+
+# Check network connectivity
+docker exec britive-broker ping -c 3 google.com
+
+# Test DNS resolution
+docker exec britive-broker nslookup your-tenant.britive-app.com
 ```
 
-## Security Considerations
+## Production Deployment
 
-- Never commit your `.env` file with real credentials to version control
-- Use Docker secrets or secure environment variable management in production
-- Regularly update the base Java image for security patches
-- Consider running the container with a non-root user in production
+For production environments:
 
-## Building for Production
+1. Use specific version tags instead of `latest`
+2. Set appropriate resource limits
+3. Configure log rotation and monitoring
+4. Use Docker Swarm or Kubernetes for orchestration
+5. Implement health checks and auto-restart policies
 
-For production deployments, consider:
+## Support
 
-1. Using multi-stage builds to reduce image size
-2. Implementing health checks
-3. Setting up proper logging and monitoring
-4. Using orchestration platforms like Kubernetes or Docker Swarm
-
-## File Structure
-
-```
-britive-broker/
-├── Dockerfile                    # Main Docker configuration
-├── docker-compose.yml           # Docker Compose with CloudWatch logging
-├── docker-compose.local.yml     # Local development without CloudWatch
-├── docker-entrypoint.sh         # Container startup script
-├── .dockerignore                # Files to exclude from build context
-├── CLOUDWATCH.md               # CloudWatch logging setup guide
-├── britive-broker-1.0.0.jar    # Application JAR file
-├── config/                      # Configuration directory
-│   ├── broker-config.yml        # Runtime configuration
-│   ├── broker-config-template.yml
-│   └── logback.xml             # Logging configuration
-├── logs/                        # Log files (created at runtime)
-│   ├── britive-broker.log       # Main log file
-│   └── archive/                # Archived log files
-└── README.md                    # This file
-```
+- Application logs: `./logs/britive-broker.log`
+- Container logs: `docker-compose logs`
+- Britive documentation: https://docs.britive.com
