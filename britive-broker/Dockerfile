@@ -4,7 +4,7 @@ FROM amazoncorretto:21
 # Set working directory
 WORKDIR /app
 
-# Install necessary utilities for the startup script and logging
+# Install necessary utilities for the startup script, logging, and broker functionality
 # Using yum since Corretto is based on Amazon Linux
 RUN yum update -y && yum install -y \
     gettext \
@@ -14,6 +14,9 @@ RUN yum update -y && yum install -y \
     hostname \
     procps \
     util-linux \
+    openssh-clients \
+    mysql \
+    postgresql \
     && yum clean all
 
 # Create directories for logs and cache
