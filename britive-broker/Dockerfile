@@ -17,14 +17,12 @@ RUN yum update -y && yum install -y \
     openssh-clients \
     mysql \
     postgresql \
-    wget \
+    python3 \
+    jq \
     && yum clean all
 
-# Install PuTTY tools manually from official source
-RUN wget -q -O /usr/local/bin/puttygen https://the.earth.li/~sgtatham/putty/latest/x86_64/puttygen \
-    && wget -q -O /usr/local/bin/pscp https://the.earth.li/~sgtatham/putty/latest/x86_64/pscp \
-    && wget -q -O /usr/local/bin/plink https://the.earth.li/~sgtatham/putty/latest/x86_64/plink \
-    && chmod +x /usr/local/bin/puttygen /usr/local/bin/pscp /usr/local/bin/plink
+# Note: PuTTY tools (puttygen, pscp, plink) are not available in Amazon Linux repos
+# Use SSH tools instead: ssh-keygen, ssh, scp are installed via openssh-clients
 
 # Create directories for logs, cache, and bootstrap scripts
 RUN mkdir -p /app/logs /app/cache /app/bootstrap
@@ -35,9 +33,10 @@ COPY britive-broker-1.0.0.jar /app/
 # Copy configuration files
 COPY config/ /app/config/
 
-# Copy startup script
+# Copy startup script and key converter
 COPY docker-entrypoint.sh /app/
-RUN chmod +x /app/docker-entrypoint.sh
+COPY convert-to-putty.py /usr/local/bin/
+RUN chmod +x /app/docker-entrypoint.sh /usr/local/bin/convert-to-putty.py
 
 # Set environment variables with default values
 ENV TENANT_SUBDOMAIN=""

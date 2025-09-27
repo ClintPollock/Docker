@@ -59,11 +59,26 @@ docker logs -f britive-broker
 
 The container includes these tools commonly needed by Britive Broker scripts:
 
-- **SSH tools**: `ssh`, `ssh-keygen`, `scp` for SSH key management
-- **PuTTY tools**: `puttygen`, `pscp`, `plink` for Windows SSH key formats
+- **SSH tools**: `ssh`, `ssh-keygen`, `scp` for SSH key management and connections
 - **MySQL client**: `mysql` for database connections
 - **PostgreSQL client**: `psql` for PostgreSQL connections
 - **System utilities**: `curl`, `hostname`, `procps`, `util-linux`
+- **Key converter**: `convert-to-putty.py` for basic PEM to PuTTY format conversion
+
+**Note**: PuTTY tools (`puttygen`, `pscp`, `plink`) are not available in Amazon Linux repositories. 
+Use standard SSH tools instead:
+- `ssh-keygen` for key generation and format conversion
+- `ssh` for connections
+- `scp` for file transfers
+
+**Key Format Conversion**:
+```bash
+# Convert PEM key to basic PuTTY format
+docker exec britive-broker-1 convert-to-putty.py /opt/britive-broker/.ssh/mykey.pem /tmp/mykey.ppk
+
+# Copy converted key to host
+docker cp britive-broker-1:/tmp/mykey.ppk ./mykey.ppk
+```
 
 ## Scaling
 
