@@ -16,8 +16,6 @@ Create a `.env` file with your Britive credentials:
 ```env
 TENANT_SUBDOMAIN=your-tenant-subdomain
 AUTHENTICATION_TOKEN=your-authentication-token
-# Optional: Custom broker name prefix (default: britive-broker)
-BROKER_NAME_PREFIX=production-broker
 ```
 
 ### 2. Build and Run
@@ -56,7 +54,6 @@ docker logs -f britive-broker
 ### Optional Environment Variables
 
 - `JAVA_OPTS`: JVM options (default: `-Xmx512m -Xms256m`)
-- `BROKER_NAME_PREFIX`: Custom prefix for broker names (default: `britive-broker`)
 
 ## Pre-installed Tools
 

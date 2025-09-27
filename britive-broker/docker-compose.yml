@@ -9,8 +9,6 @@ services:
       # Optional Java configuration
       - JAVA_OPTS=${JAVA_OPTS:--Xmx512m -Xms256m}
       - LOG_TO_STDOUT=true
-      # Custom broker naming
-      - BROKER_NAME_PREFIX=${BROKER_NAME_PREFIX:-britive-broker}
     volumes:
       # Persist logs and cache data
       - britive-logs:/app/logs

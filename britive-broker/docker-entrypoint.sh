@@ -53,22 +53,15 @@ fi
 # Create the runtime configuration file from the template
 log "Configuring broker with tenant subdomain: $TENANT_SUBDOMAIN"
 
-# Get container ID for unique naming
-CONTAINER_ID=$(hostname)
-BROKER_NAME="${BROKER_NAME_PREFIX:-britive-broker}-${CONTAINER_ID}"
-
 # Use envsubst to replace environment variables in the config file
 cat > /app/config/broker-config.yml << EOF
 config:
   bootstrap:
     tenant_subdomain: $TENANT_SUBDOMAIN
     authentication_token: $AUTHENTICATION_TOKEN
-    # Override the default hostname-based broker name
-    broker_name_generator: echo "$BROKER_NAME"
 EOF
 
 log "Configuration file created successfully"
-log "Broker will be named: $BROKER_NAME"
 
 # Ensure cache and logs directories exist and have proper permissions
 mkdir -p /app/cache /app/logs /app/logs/archive

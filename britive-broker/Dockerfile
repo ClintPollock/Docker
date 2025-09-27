@@ -19,8 +19,8 @@ RUN yum update -y && yum install -y \
     postgresql \
     && yum clean all
 
-# Create directories for logs and cache
-RUN mkdir -p /app/logs /app/cache
+# Create directories for logs, cache, and bootstrap scripts
+RUN mkdir -p /app/logs /app/cache /app/bootstrap
 
 # Copy the JAR file
 COPY britive-broker-1.0.0.jar /app/
