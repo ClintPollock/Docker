@@ -11,6 +11,9 @@ RUN yum update -y && yum install -y \
     curl \
     unzip \
     shadow-utils \
+    hostname \
+    procps \
+    util-linux \
     && yum clean all
 
 # Create directories for logs and cache
