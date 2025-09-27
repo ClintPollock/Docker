@@ -1,10 +1,9 @@
-version: '3.8'
-
 services:
   britive-broker:
     build: .
     image: britive-broker:latest
     container_name: britive-broker
+    hostname: britive-broker-prod
     environment:
       # Required configuration
       - TENANT_SUBDOMAIN=${TENANT_SUBDOMAIN}
@@ -14,7 +13,7 @@ services:
       # CloudWatch logging configuration
       - AWS_REGION=${AWS_REGION:-us-east-1}
       - CLOUDWATCH_LOG_GROUP=${CLOUDWATCH_LOG_GROUP:-/aws/docker/britive-broker}
-      - CLOUDWATCH_LOG_STREAM=${CLOUDWATCH_LOG_STREAM:-${HOSTNAME}}
+      - CLOUDWATCH_LOG_STREAM=${CLOUDWATCH_LOG_STREAM:-britive-broker-prod}
       - LOG_TO_STDOUT=${LOG_TO_STDOUT:-true}
     # Logging configuration - choose one of the following options:
     # Option 1: CloudWatch Logs (requires AWS credentials and awslogs driver)
@@ -23,7 +22,7 @@ services:
       options:
         awslogs-region: ${AWS_REGION:-us-east-1}
         awslogs-group: ${CLOUDWATCH_LOG_GROUP:-/aws/docker/britive-broker}
-        awslogs-stream: ${CLOUDWATCH_LOG_STREAM:-britive-broker-${HOSTNAME}}
+        awslogs-stream: ${CLOUDWATCH_LOG_STREAM:-britive-broker-prod}
         awslogs-create-group: "true"
     # Option 2: JSON file logging (uncomment to use instead of CloudWatch)
     # logging:
@@ -40,17 +39,9 @@ services:
     # ports:
     #   - "8080:8080"
     restart: unless-stopped
-    # Add network configuration if needed
-    # networks:
-    #   - britive-network
 
 volumes:
   britive-logs:
     driver: local
   britive-cache:
     driver: local
-
-# Uncomment if you need custom networking
-# networks:
-#   britive-network:
-#     driver: bridge
