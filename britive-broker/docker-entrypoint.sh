@@ -73,13 +73,23 @@ ln -sf /app/logs/britive-broker.log /var/log/britive-broker.log 2>/dev/null || t
 # Initialize log file if it doesn't exist
 touch /app/logs/britive-broker.log
 
-# Fix SSH keys permissions inside container
+# Fix SSH keys permissions inside container (if writable)
 if [ -d "/opt/britive-broker/.ssh" ]; then
-    log "Setting proper SSH key permissions"
-    chmod 700 /opt/britive-broker/.ssh
-    chmod 600 /opt/britive-broker/.ssh/* 2>/dev/null || true
-    chown -R root:root /opt/britive-broker/.ssh 2>/dev/null || true
-    log "SSH keys permissions configured"
+    log "Checking SSH key permissions"
+    # Try to set permissions, but don't fail if read-only
+    if chmod 700 /opt/britive-broker/.ssh 2>/dev/null; then
+        chmod 600 /opt/britive-broker/.ssh/* 2>/dev/null || true
+        chown -R root:root /opt/britive-broker/.ssh 2>/dev/null || true
+        log "SSH keys permissions configured"
+    else
+        log "SSH directory is read-only - assuming host permissions are correct"
+        # Check if files exist and are readable
+        if ls /opt/britive-broker/.ssh/*.pem >/dev/null 2>&1; then
+            log "SSH keys found and accessible"
+        else
+            log "WARNING: No SSH keys found in /opt/britive-broker/.ssh/"
+        fi
+    fi
 fi
 
 log "Log directory structure created"
