@@ -54,6 +54,71 @@ docker run -d \
 ### Optional Environment Variables
 
 - `JAVA_OPTS`: JVM options (default: `-Xmx512m -Xms256m`)
+- `LOG_TO_STDOUT`: Enable stdout logging (default: `true`)
+- `AWS_REGION`: AWS region for CloudWatch logging
+- `CLOUDWATCH_LOG_GROUP`: CloudWatch log group name (default: `/aws/docker/britive-broker`)
+- `CLOUDWATCH_LOG_STREAM`: CloudWatch log stream name
+
+## Logging
+
+The Britive Broker supports multiple logging configurations:
+
+### Log Locations
+- **Container logs**: `/app/logs/britive-broker.log`
+- **Symlinked path**: `/var/log/britive-broker.log`
+- **Stdout**: When `LOG_TO_STDOUT=true` (default)
+- **CloudWatch**: When using awslogs driver
+
+### CloudWatch Integration
+
+For production deployments with CloudWatch logging:
+
+1. **Set up AWS credentials**:
+   ```bash
+   export AWS_ACCESS_KEY_ID=your-access-key
+   export AWS_SECRET_ACCESS_KEY=your-secret-key
+   export AWS_DEFAULT_REGION=us-east-1
+   ```
+
+2. **Add CloudWatch variables to your `.env` file**:
+   ```env
+   AWS_REGION=us-east-1
+   CLOUDWATCH_LOG_GROUP=/aws/docker/britive-broker
+   CLOUDWATCH_LOG_STREAM=britive-broker-production
+   ```
+
+3. **Run with CloudWatch logging**:
+   ```bash
+   docker-compose up -d
+   ```
+
+### Local Development
+
+For local development without CloudWatch:
+
+```bash
+docker-compose -f docker-compose.local.yml up -d
+```
+
+This will:
+- Mount logs directory to `./logs` on the host
+- Use JSON file logging driver
+- Still output logs to stdout
+
+### Viewing Logs
+
+```bash
+# View container stdout logs
+docker logs -f britive-broker
+
+# View log file directly
+docker exec britive-broker tail -f /app/logs/britive-broker.log
+
+# View CloudWatch logs (AWS CLI)
+aws logs tail /aws/docker/britive-broker --follow
+```
+
+For detailed CloudWatch setup instructions, see [CLOUDWATCH.md](CLOUDWATCH.md).
 
 ## Volumes
 
@@ -140,13 +205,18 @@ For production deployments, consider:
 ```
 britive-broker/
 ├── Dockerfile                    # Main Docker configuration
-├── docker-compose.yml           # Docker Compose configuration
+├── docker-compose.yml           # Docker Compose with CloudWatch logging
+├── docker-compose.local.yml     # Local development without CloudWatch
 ├── docker-entrypoint.sh         # Container startup script
 ├── .dockerignore                # Files to exclude from build context
+├── CLOUDWATCH.md               # CloudWatch logging setup guide
 ├── britive-broker-1.0.0.jar    # Application JAR file
 ├── config/                      # Configuration directory
 │   ├── broker-config.yml        # Runtime configuration
 │   ├── broker-config-template.yml
-│   └── logback.xml
+│   └── logback.xml             # Logging configuration
+├── logs/                        # Log files (created at runtime)
+│   ├── britive-broker.log       # Main log file
+│   └── archive/                # Archived log files
 └── README.md                    # This file
 ```

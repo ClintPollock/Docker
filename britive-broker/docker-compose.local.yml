@@ -1,0 +1,39 @@
+version: '3.8'
+
+# Local development version without CloudWatch logging
+services:
+  britive-broker:
+    build: .
+    image: britive-broker:latest
+    container_name: britive-broker-local
+    environment:
+      # Required configuration
+      - TENANT_SUBDOMAIN=${TENANT_SUBDOMAIN}
+      - AUTHENTICATION_TOKEN=${AUTHENTICATION_TOKEN}
+      # Optional Java configuration
+      - JAVA_OPTS=-Xmx512m -Xms256m
+      # Local logging configuration
+      - LOG_TO_STDOUT=true
+    volumes:
+      # Persist logs and cache data
+      - britive-logs:/app/logs
+      - britive-cache:/app/cache
+      # Mount logs directory to host for easy access
+      - ./logs:/app/logs
+    # Local file-based logging
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "5"
+        labels: "service=britive-broker"
+    # Uncomment and adjust if your broker needs specific port exposure
+    # ports:
+    #   - "8080:8080"
+    restart: unless-stopped
+
+volumes:
+  britive-logs:
+    driver: local
+  britive-cache:
+    driver: local

@@ -11,6 +11,27 @@ services:
       - AUTHENTICATION_TOKEN=${AUTHENTICATION_TOKEN}
       # Optional Java configuration
       - JAVA_OPTS=-Xmx512m -Xms256m
+      # CloudWatch logging configuration
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - CLOUDWATCH_LOG_GROUP=${CLOUDWATCH_LOG_GROUP:-/aws/docker/britive-broker}
+      - CLOUDWATCH_LOG_STREAM=${CLOUDWATCH_LOG_STREAM:-${HOSTNAME}}
+      - LOG_TO_STDOUT=${LOG_TO_STDOUT:-true}
+    # Logging configuration - choose one of the following options:
+    # Option 1: CloudWatch Logs (requires AWS credentials and awslogs driver)
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ${AWS_REGION:-us-east-1}
+        awslogs-group: ${CLOUDWATCH_LOG_GROUP:-/aws/docker/britive-broker}
+        awslogs-stream: ${CLOUDWATCH_LOG_STREAM:-britive-broker-${HOSTNAME}}
+        awslogs-create-group: "true"
+    # Option 2: JSON file logging (uncomment to use instead of CloudWatch)
+    # logging:
+    #   driver: json-file
+    #   options:
+    #     max-size: "100m"
+    #     max-file: "5"
+    #     labels: "service=britive-broker"
     volumes:
       # Persist logs and cache data
       - britive-logs:/app/logs

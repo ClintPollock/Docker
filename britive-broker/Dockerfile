@@ -1,12 +1,14 @@
 # Use OpenJDK 21 as base image
-FROM openjdk:21-jre-slim
+FROM eclipse-temurin:21-jre
 
 # Set working directory
 WORKDIR /app
 
-# Install necessary utilities for the startup script
+# Install necessary utilities for the startup script and logging
 RUN apt-get update && apt-get install -y \
     envsubst \
+    curl \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
 
 # Create directories for logs and cache
@@ -26,12 +28,21 @@ RUN chmod +x /app/docker-entrypoint.sh
 ENV TENANT_SUBDOMAIN=""
 ENV AUTHENTICATION_TOKEN=""
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
+# CloudWatch logging configuration
+ENV AWS_REGION=""
+ENV CLOUDWATCH_LOG_GROUP="/aws/docker/britive-broker"
+ENV CLOUDWATCH_LOG_STREAM=""
+ENV LOG_TO_STDOUT="true"
 
 # Expose port (if the broker uses any specific port, adjust as needed)
 # EXPOSE 8080
 
 # Create volumes for persistent data
 VOLUME ["/app/logs", "/app/cache"]
+
+# Create symlink for /var/log/britive-broker.log to make it accessible
+RUN mkdir -p /var/log && \
+    ln -sf /app/logs/britive-broker.log /var/log/britive-broker.log
 
 # Run the startup script
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
