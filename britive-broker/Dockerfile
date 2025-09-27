@@ -1,15 +1,17 @@
-# Use OpenJDK 21 as base image
-FROM eclipse-temurin:21-jre
+# Use Amazon Corretto 21 (optimized for AWS)
+FROM amazoncorretto:21
 
 # Set working directory
 WORKDIR /app
 
 # Install necessary utilities for the startup script and logging
-RUN apt-get update && apt-get install -y \
-    envsubst \
+# Using yum since Corretto is based on Amazon Linux
+RUN yum update -y && yum install -y \
+    gettext \
     curl \
     unzip \
-    && rm -rf /var/lib/apt/lists/*
+    shadow-utils \
+    && yum clean all
 
 # Create directories for logs and cache
 RUN mkdir -p /app/logs /app/cache
