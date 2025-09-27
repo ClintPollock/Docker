@@ -18,10 +18,11 @@ RUN yum update -y && yum install -y \
     mysql \
     postgresql \
     python3 \
-    && yum clean all \
-    && yum install -y epel-release \
-    && yum install -y jq \
     && yum clean all
+
+# Install jq manually since it's not available in Amazon Linux 2 repos
+RUN curl -L -o /usr/local/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 \
+    && chmod +x /usr/local/bin/jq
 
 # Note: PuTTY tools (puttygen, pscp, plink) are not available in Amazon Linux repos
 # Use SSH tools instead: ssh-keygen, ssh, scp are installed via openssh-clients
