@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  britive-broker:
+    build: .
+    image: britive-broker:latest
+    container_name: britive-broker
+    environment:
+      # Required configuration
+      - TENANT_SUBDOMAIN=${TENANT_SUBDOMAIN}
+      - AUTHENTICATION_TOKEN=${AUTHENTICATION_TOKEN}
+      # Optional Java configuration
+      - JAVA_OPTS=-Xmx512m -Xms256m
+    volumes:
+      # Persist logs and cache data
+      - britive-logs:/app/logs
+      - britive-cache:/app/cache
+    # Uncomment and adjust if your broker needs specific port exposure
+    # ports:
+    #   - "8080:8080"
+    restart: unless-stopped
+    # Add network configuration if needed
+    # networks:
+    #   - britive-network
+
+volumes:
+  britive-logs:
+    driver: local
+  britive-cache:
+    driver: local
+
+# Uncomment if you need custom networking
+# networks:
+#   britive-network:
+#     driver: bridge

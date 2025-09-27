@@ -1,0 +1,4 @@
+config:
+  bootstrap:
+    tenant_subdomain: <tenant_subdomain>
+    authentication_token: <authentication_token>
