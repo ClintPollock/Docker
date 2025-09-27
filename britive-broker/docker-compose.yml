@@ -15,6 +15,8 @@ services:
       - britive-cache:/app/cache
       # Optional: Mount logs to host for easy access
       - ./logs:/app/logs
+      # Mount SSH keys directory
+      - ./ssh-keys:/opt/britive-broker/.ssh:ro
     logging:
       driver: json-file
       options:
