@@ -80,6 +80,34 @@ docker exec britive-broker-1 convert-to-putty.py /opt/britive-broker/.ssh/mykey.
 docker cp britive-broker-1:/tmp/mykey.ppk ./mykey.ppk
 ```
 
+**SSH Setup Script Usage**:
+The container includes all tools needed for the `britive-ssh-setup.sh` script:
+```bash
+# Example: Run SSH setup script in container
+docker exec britive-broker-1 bash -c "
+TRX=checkout-123 \
+HOST=server.example.com \
+BRITIVE_USER_EMAIL=user@company.com \
+/path/to/britive-ssh-setup.sh
+"
+
+# The script returns JSON with both key formats:
+# {
+#   "pemContent": "-----BEGIN RSA PRIVATE KEY-----...",
+#   "ppkContent": "PuTTY-User-Key-File-2: ssh-rsa...",
+#   "server": {
+#     "host": "server.example.com",
+#     "user": "user",
+#     "hasSudo": false
+#   },
+#   "usage": {
+#     "ssh": "ssh -i private_key.pem user@server.example.com",
+#     "scp": "scp -i private_key.pem file.txt user@server.example.com:~/",
+#     "putty": "Use private_key.ppk in PuTTY with Host: server.example.com, User: user"
+#   }
+# }
+```
+
 ## Scaling
 
 Run multiple broker instances for high availability:

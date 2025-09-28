@@ -9,6 +9,36 @@ log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
 }
 
+# Function to setup SSH keys with proper permissions
+setup_ssh_keys() {
+    local ssh_keys_dir="/app/ssh-keys"
+    
+    log "Setting up SSH keys from $ssh_keys_dir"
+    
+    if [ -d "$ssh_keys_dir" ]; then
+        log "SSH keys directory found"
+        
+        # List available keys
+        if ls "$ssh_keys_dir"/*.pem 1> /dev/null 2>&1; then
+            log "Available SSH keys:"
+            ls -la "$ssh_keys_dir"/*.pem | while read line; do
+                log "  $line"
+            done
+            
+            # Fix permissions for all .pem files
+            find "$ssh_keys_dir" -name "*.pem" -exec chmod 600 {} \;
+            log "SSH key permissions set to 600"
+        else
+            log "WARNING: No .pem files found in $ssh_keys_dir"
+            log "Available files:"
+            ls -la "$ssh_keys_dir" 2>/dev/null || log "Directory is empty"
+        fi
+    else
+        log "WARNING: SSH keys directory not mounted at $ssh_keys_dir"
+        log "Mount your SSH keys using: -v /path/to/your/keys:/app/ssh-keys:ro"
+    fi
+}
+
 # Function to tail logs to stdout
 tail_logs() {
     local log_file="$1"
@@ -38,6 +68,9 @@ cleanup() {
 trap cleanup SIGTERM SIGINT
 
 log "Starting Britive Broker container..."
+
+# Setup SSH keys first
+setup_ssh_keys
 
 # Check if required environment variables are set
 if [ -z "$TENANT_SUBDOMAIN" ]; then
@@ -72,25 +105,6 @@ ln -sf /app/logs/britive-broker.log /var/log/britive-broker.log 2>/dev/null || t
 
 # Initialize log file if it doesn't exist
 touch /app/logs/britive-broker.log
-
-# Fix SSH keys permissions inside container (if writable)
-if [ -d "/opt/britive-broker/.ssh" ]; then
-    log "Checking SSH key permissions"
-    # Try to set permissions, but don't fail if read-only
-    if chmod 700 /opt/britive-broker/.ssh 2>/dev/null; then
-        chmod 600 /opt/britive-broker/.ssh/* 2>/dev/null || true
-        chown -R root:root /opt/britive-broker/.ssh 2>/dev/null || true
-        log "SSH keys permissions configured"
-    else
-        log "SSH directory is read-only - assuming host permissions are correct"
-        # Check if files exist and are readable
-        if ls /opt/britive-broker/.ssh/*.pem >/dev/null 2>&1; then
-            log "SSH keys found and accessible"
-        else
-            log "WARNING: No SSH keys found in /opt/britive-broker/.ssh/"
-        fi
-    fi
-fi
 
 log "Log directory structure created"
 

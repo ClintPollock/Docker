@@ -27,9 +27,6 @@ services:
         max-size: "100m"
         max-file: "5"
         labels: "service=britive-broker"
-    # Uncomment and adjust if your broker needs specific port exposure
-    # ports:
-    #   - "8080:8080"
     restart: unless-stopped
 
 volumes:

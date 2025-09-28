@@ -1,0 +1,13 @@
+# SSH Keys Directory
+# Place your .pem files here
+# 
+# Example files:
+# - production.pem
+# - staging.pem  
+# - development.pem
+#
+# Files in this directory will be mounted into the container at /app/ssh-keys/
+
+# This file ensures the directory exists in git
+*
+!.gitkeep
