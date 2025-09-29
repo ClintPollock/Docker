@@ -2,9 +2,10 @@
 FROM amazoncorretto:21
 
 # Install MSSQL tools (sqlcmd)
-RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc | rpm --import - \
+RUN yum install -y gnupg2 \
+    && curl -sSL https://packages.microsoft.com/keys/microsoft.asc | gpg2 --import \
     && curl -sSL https://packages.microsoft.com/config/rhel/7/prod.repo | tee /etc/yum.repos.d/mssql-release.repo \
-    && yum install -y msodbcsql17 mssql-tools unixODBC-devel \
+    && ACCEPT_EULA=Y yum install -y msodbcsql17 mssql-tools unixODBC-devel \
     && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> /etc/profile \
     && yum clean all
 
