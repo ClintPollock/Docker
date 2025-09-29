@@ -1,3 +1,6 @@
+# Use Amazon Corretto 21 (optimized for AWS)
+FROM amazoncorretto:21
+
 # Install MSSQL tools (sqlcmd)
 RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc | rpm --import - \
     && curl -sSL https://packages.microsoft.com/config/rhel/7/prod.repo | tee /etc/yum.repos.d/mssql-release.repo \
@@ -16,8 +19,7 @@ RUN yum install -y openssh-clients
 
 # Optional: Install pywinrm for remote PowerShell via WinRM
 RUN pip3 install pywinrm
-# Use Amazon Corretto 21 (optimized for AWS)
-FROM amazoncorretto:21
+
 
 # Set working directory
 WORKDIR /app
