@@ -1,3 +1,21 @@
+# Install MSSQL tools (sqlcmd)
+RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc | rpm --import - \
+    && curl -sSL https://packages.microsoft.com/config/rhel/7/prod.repo | tee /etc/yum.repos.d/mssql-release.repo \
+    && yum install -y msodbcsql17 mssql-tools unixODBC-devel \
+    && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> /etc/profile \
+    && yum clean all
+
+# Install PowerShell
+RUN yum install -y wget \
+    && wget https://github.com/PowerShell/PowerShell/releases/download/v7.4.1/powershell-7.4.1-1.rh.x86_64.rpm \
+    && yum install -y powershell-7.4.1-1.rh.x86_64.rpm \
+    && rm powershell-7.4.1-1.rh.x86_64.rpm
+
+# Install OpenSSH client
+RUN yum install -y openssh-clients
+
+# Optional: Install pywinrm for remote PowerShell via WinRM
+RUN pip3 install pywinrm
 # Use Amazon Corretto 21 (optimized for AWS)
 FROM amazoncorretto:21
 
